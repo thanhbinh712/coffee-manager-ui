@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import callApi from "../../../util/callerApi";
-import { Button, Col, Input, Row, Modal, Form, Select , Table} from "antd";
+import { Button, Col, Input, Row, Modal, Form, Select , Table, Image} from "antd";
 const { Option } = Select;
 const ProductList = (props) => {
   const [products, setProducts] = useState([]);
@@ -64,10 +64,19 @@ const ProductList = (props) => {
       key: "price",
     },
     {
+      title: "Image",
+      dataIndex: "image",
+      key: "image",
+      render: (text, record) =>(
+        <img src = {`http://localhost:8080/image/${record.image}`} width="50vh" height = "50vh">
+        </img>
+      ),
+    },
+    {
       title: "Action",
       key: "action",
       align: "center",
-      render: (text, record) => (
+      render: (text, record) => 
         <React.Fragment>
           <Button type="danger" onClick={() => onDelete(record)}>
             Xóa
@@ -154,7 +163,6 @@ const ProductList = (props) => {
             </Form>
           </Modal>
         </React.Fragment>
-      ),
     },
   ];
   return (

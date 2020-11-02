@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import callApi from "./../../util/callerApi";
 import "./login.css";
-import { Form, Input, Button, Checkbox, Row, Col, Image } from "antd";
-import {Redirect} from "react-router-dom"
+import { Form, Input, Button, Checkbox, Row, Col, Image, Layout } from "antd";
+import {Redirect} from "react-router-dom";
+const { Footer, Content } = Layout;
 const Login = (props) => {
   const [users, setUsers] = useState([]);
   useEffect(() => {}, []);
@@ -38,7 +39,8 @@ const Login = (props) => {
       wrapperCol: { span: 16 },
     };
     return (
-      <div className="form-signin-custom" style={{height:"100vh",width:"100%"}}>
+      <Layout className="form-signin-custom" style={{height:"100vh",width:"100%"}}>
+        <Content>
         <Row>
           <Col md={8}></Col>
           <Col md={8} style={{ marginTop: "30vh" }}>
@@ -53,7 +55,7 @@ const Login = (props) => {
                 label="Email"
                 name="email"
                 rules={[
-                  { required: true, message: "Please input your username!" },
+                  { required: true, message: "Mời nhập email!" },
                   { type: "email", message: "Không đúng định dạng" },
                 ]}
               >
@@ -64,25 +66,26 @@ const Login = (props) => {
                 label="Password"
                 name="password"
                 rules={[
-                  { required: true, message: "Please input your password!" },
+                  { required: true, message: "Mời nhập mật khẩu!" },
                 ]}
               >
                 <Input.Password />
               </Form.Item>
 
-              <Form.Item name="remember" valuePropName="checked">
-                <Checkbox>Remember me</Checkbox>
+              <Form.Item {...tailLayout} name="remember" valuePropName="checked">
+                <Checkbox>Nhớ mật khẩu</Checkbox>
               </Form.Item>
 
-              <Form.Item>
+              <Form.Item {...tailLayout}>
                 <Button type="primary" htmlType="submit">
-                  Submit
+                  Đăng nhập
                 </Button>
               </Form.Item>
             </Form>
           </Col>
         </Row>
-      </div>
+        </Content>
+      </Layout>
     );
   };
   return (

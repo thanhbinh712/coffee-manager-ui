@@ -1,15 +1,37 @@
-import { Button, Col, Input, Row, Modal, Form, Select } from "antd";
+import {  Upload, message, Button, Col, Input, Row, Modal, Form, Select } from "antd";
+import { UploadOutlined } from '@ant-design/icons';
 import React, { useEffect, useState } from "react";
 import callApi from "../../../util/callerApi";
 import ProductList from "./../components/ProductList";
 import Swal from "sweetalert2";
+import axios from "axios";
 const { Option } = Select;
+
+const props = {
+  name: 'file',
+  action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+  headers: {
+    authorization: 'authorization-text',
+  },
+  onChange(info) {
+    if (info.file.status !== 'uploading') {
+      console.log(info.file, info.fileList);
+    }
+    if (info.file.status === 'done') {
+      message.success(`${info.file.name} file uploaded successfully`);
+    } else if (info.file.status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+  },
+};
 const Products = () => {
   const [visible, setVisible] = useState(false);
+  const [file,setFile]=useState(null);
   const [types, setTypes] = useState([]);
   const handleOk = (e) => {
-    //    setVisible(false)
+    console.log(e);
   };
+
 
   useEffect(() => {
     callApi("get", "http://localhost:8080/api/type", null, null, "").then(
@@ -30,29 +52,37 @@ const Products = () => {
     wrapperCol: { span: 16 },
   };
   const onFinish = (values) => {
-      callApi("post", "http://localhost:8080/api/product", values, null, JSON.parse(localStorage.getItem("user")).accessToken)
-        .then((res) => {
-          localStorage.setItem("type_code", JSON.stringify(res.data));
-          Swal.fire({
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("product_code", values.product_code);
+    formData.append("name", values.name);
+    formData.append("description", values.description);
+    formData.append("price", values.price);
+    formData.append("types_type_code",values.types_type_code);
+    axios.post('http://localhost:8080/api/product', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+    }).then((res)=>{
+      Swal.fire({
+        position: 'top-end',
+        icon: 'success',
+        title: 'Thành công',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(()=>{
+        window.location.reload(false)
+      })
+    })
+    .catch((err) => {
+        Swal.fire({
             position: 'top-end',
-            icon: 'success',
-            title: 'Thành công',
+            icon: 'error',
+            title: 'Thất bại',
             showConfirmButton: false,
             timer: 1500
-          }).then(()=>{
-            window.location.reload(false)
           })
-          
-        })
-        .catch((err) => {
-            Swal.fire({
-                position: 'top-end',
-                icon: 'error',
-                title: 'Thất bại',
-                showConfirmButton: false,
-                timer: 1500
-              })
-        });
+    });
   };
   return (
     <React.Fragment>
@@ -114,13 +144,6 @@ const Products = () => {
             <Input />
           </Form.Item>
           <Form.Item
-            label="Hình ảnh"
-            name="image"
-            rules={[{ required: true, message: "Mời chọn hình!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
             label="Loại"
             name="types_type_code"
             rules={[{ required: true, message: "Mời chọn loại!" }]}
@@ -139,8 +162,16 @@ const Products = () => {
                 </Option>
               ))}
             </Select>
-              </Form.Item>
+          </Form.Item>
         </Form>
+        <div>
+          <input type="file"  onChange={(evt) => {
+                evt.preventDefault();
+                console.log(evt.target.files[0]);
+               setFile(evt.target.files[0])
+            }}/>
+        </div>
+           
       </Modal>
     </React.Fragment>
   );
