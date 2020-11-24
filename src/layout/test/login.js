@@ -22,7 +22,7 @@ const Login = (props) => {
   const Demo = () => {
     const onFinish = (values) => {
       console.log("Success:", values);
-      callApi("post", "http://localhost:8080/api/auth/login", values, null, "")
+      callApi("post", process.env.REACT_APP_URL_API+"/api/auth/login", values, null, "")
         .then((res) => {
           //setUsers(res.data);//lưu thhoong tin trên local storege
           localStorage.setItem("user", JSON.stringify(res.data));

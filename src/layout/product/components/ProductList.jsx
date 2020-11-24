@@ -1,31 +1,82 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import callApi from "../../../util/callerApi";
-import { Button, Col, Input, Row, Modal, Form, Select , Table, Image} from "antd";
+import NumberFormat from 'react-number-format';
+import Swal from "sweetalert2";
+import axios from "axios";
+import {
+  Table,
+  message,
+  Button,
+  Col,
+  Input,
+  Row,
+  Modal,
+  Form,
+  Select,
+  Space
+} from "antd";
 const { Option } = Select;
+
+const props = {
+  name: "file",
+  action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
+  headers: {
+    authorization: "authorization-text",
+  },
+  onChange(info) {
+    if (info.file.status !== "uploading") {
+      console.log(info.file, info.fileList);
+    }
+    if (info.file.status === "done") {
+      message.success(`${info.file.name} file uploaded successfully`);
+    } else if (info.file.status === "error") {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+  },
+};
+
 const ProductList = (props) => {
   const [products, setProducts] = useState([]);
+  const [file, setFile] = useState(null);
   const [visible, setVisible] = useState(false);
   const [types, setTypes] = useState([]);
-  const [form]=Form.useForm();
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [current, setCurrent] = useState(1);
+  const [initFilter,setInitFilter] = useState({page:1,perPage:10});
+  const [form] = Form.useForm();
+  const [formFilter] = Form.useForm();
   useEffect(() => {
-    callApi("get", "http://localhost:8080/api/product", null, null, "").then(
+    callApi("get", `${process.env.REACT_APP_URL_API}/api/type`, null, null, "").then(
       (res) => {
-        setProducts(res.data);
+        setTypes(res.data);
       }
     );
+    setLoading(true);
+    callApi(
+      "get",
+      `${process.env.REACT_APP_URL_API}/api/product`,
+      null,
+      { page: 1, perPage: 10 },
+      ""
+    ).then((res) => {
+      setLoading(false);
+      setProducts(res.data.data);
+      setTotal(res.data.total);
+    });
   }, []);
   const onUpdate = (record) => {
     setVisible(true);
     console.log(record);
     form.setFieldsValue({
-      product_code:record.product_code,
-      name:record.name,
-      price:record.price,
-      description:record.description,
-      image:record.image,
-      types_type_code:record.types_type_code,
-    })
+      product_code: record.product_code,
+      name: record.name,
+      price: record.price,
+      description: record.description,
+      image: record.image,
+      types_type_code: record?.detail_type?.type_code,
+    });
   };
 
   const handleCancel = (e) => {
@@ -36,11 +87,80 @@ const ProductList = (props) => {
     //    setVisible(false)
   };
 
-  const onFinish = () => {
-    //    setVisible(false)
+  const onFinish = (values) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("name", values.name);
+    formData.append("price", values.price);
+    formData.append("description", values.description);
+    formData.append("types_type_code",values.types_type_code);
+    axios.put('http://localhost:8080/api/product', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+    }).then((res)=>{
+      Swal.fire({
+        position: 'top-end',
+        icon: 'success',
+        title: 'Thành công',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(()=>{
+        window.location.reload(false)
+      })
+    })
+    .catch((err) => {
+        Swal.fire({
+            position: 'top-end',
+            icon: 'error',
+            title: 'Thất bại',
+            showConfirmButton: false,
+            timer: 1500
+          })
+    });
   };
 
-  const onDelete = (record) => {};
+  const onDelete = (record) => {
+    let param = {
+      product_code: record.product_code,
+    };
+    Swal.fire({
+      title: "Bạn có chắc muốn xóa không?",
+      text: "Bạn không thể hoàn tác hành động này!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    }).then((result) => {
+      if(result.value){
+        callApi(
+          "delete",
+          `${process.env.REACT_APP_URL_API}/api/product`,
+          param,null,"").then((res)=>{
+            Swal.fire({
+              position: 'top-end',
+              icon: 'success',
+              title: 'Thành công',
+              showConfirmButton: false,
+              timer: 1500
+            }).then(()=>{
+              window.location.reload(false)
+            })
+          })
+          .catch((err) => {
+              Swal.fire({
+                  position: 'top-end',
+                  icon: 'error',
+                  title: 'Thất bại',
+                  showConfirmButton: false,
+                  timer: 1500
+                })
+          });
+      }
+    });
+  };
 
   const layout = {
     labelCol: { span: 8 },
@@ -49,34 +169,49 @@ const ProductList = (props) => {
 
   const columns = [
     {
-      title: "Product code",
+      title: "Mã sản phẩm",
       dataIndex: "product_code",
       key: "product_code",
     },
     {
-      title: "Name",
+      title: "Tên sản phẩm",
       dataIndex: "name",
       key: "name",
     },
     {
-      title: "Price",
-      dataIndex: "price",
-      key: "price",
-    },
-    {
-      title: "Image",
+      title: "Hình ảnh",
       dataIndex: "image",
       key: "image",
-      render: (text, record) =>(
-        <img src = {`http://localhost:8080/image/${record.image}`} width="50vh" height = "50vh">
-        </img>
+      render: (text, record) => (
+        <img
+          src={`${process.env.REACT_APP_URL_API}/image/${record.image}`}
+          width="50vh"
+          height="50vh"
+        ></img>
       ),
     },
+    {
+      title: "Giá",
+      dataIndex: "price",
+      key: "price",
+      render: (text, record) => (
+        <NumberFormat value={record.price} displayType={'text'} thousandSeparator={true} suffix={' VNĐ'} />
+      ),
+    },
+    {
+      title: "Loại",
+      // dataIndex: "types_type_code",
+      key: "types_type_code",
+      render:(text, record) => (
+        <a>
+          {record?.detail_type?.name}
+        </a>
+      )},
     {
       title: "Action",
       key: "action",
       align: "center",
-      render: (text, record) => 
+      render: (text, record) => (
         <React.Fragment>
           <Button type="danger" onClick={() => onDelete(record)}>
             Xóa
@@ -103,7 +238,7 @@ const ProductList = (props) => {
               {...layout}
               name="basic"
               initialValues={{ remember: true }}
-              onFinish={onFinish}
+              //onFinish={onFinish}
               id="category-editor-form-update-product"
               form={form}
             >
@@ -112,7 +247,7 @@ const ProductList = (props) => {
                 name="product_code"
                 rules={[{ required: true, message: "Mời nhập mã món!" }]}
               >
-                <Input />
+                <Input disabled />
               </Form.Item>
               <Form.Item
                 label="Tên món"
@@ -126,16 +261,9 @@ const ProductList = (props) => {
                 name="price"
                 rules={[{ required: true, message: "Mời nhập giá!" }]}
               >
-                <Input />
-              </Form.Item>
+                <Input thousandSeparator={true} suffix={' VNĐ'} />
+                </Form.Item>
               <Form.Item label="Mô tả" name="description">
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="Hình ảnh"
-                name="image"
-                rules={[{ required: true, message: "Mời chọn hình!" }]}
-              >
                 <Input />
               </Form.Item>
               <Form.Item
@@ -161,13 +289,83 @@ const ProductList = (props) => {
                 </Select>
               </Form.Item>
             </Form>
+            <div>
+              <input
+                type="file"
+                name="image"
+                onChange={(evt) => {
+                  evt.preventDefault();
+                  console.log(evt.target.files[0]);
+                  setFile(evt.target.files[0]);
+                }}
+              />
+            </div>
           </Modal>
         </React.Fragment>
+      ),
     },
   ];
+  const onChangeSize = (page, pageSize) => {
+    setCurrent(parseInt(page.current));
+    setLoading(true);
+    callApi(
+      "get",
+      "http://localhost:8080/api/product",
+      null,
+      { page: parseInt(page.current), perPage: 10 },
+      ""
+    ).then((res) => {
+      setLoading(false);
+      setProducts(res.data.data);
+      setTotal(res.data.total);
+      setInitFilter({ page: parseInt(page.current), perPage: 10 })
+    });
+  };
   return (
     <React.Fragment>
-      <Table dataSource={products} columns={columns} />
+      <Row style={{ marginLeft: "190px"}}>
+        <Col md={12}>
+          <Form
+            {...layout}
+            name="basic"
+            initialValues={{ remember: true }}
+            onFinish={onFinish}
+            form={formFilter}
+          >
+            <Form.Item
+              label="Tìm kiếm"
+              name="name"
+              rules={[
+                {message: "Nhập tên để tìm!" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+            
+          </Form>
+        </Col>
+        <Col md={2} style={{ textAlign: "right" }}>
+          <Button type="primary" onClick={()=>formFilter.submit()} >
+            Tìm 
+          </Button>
+        </Col>
+      </Row>
+      <Table
+        bordered
+        columns={columns}
+        loading={loading}
+        dataSource={products}
+        pagination={{
+          total: total,
+          defaultPageSize: 10,
+          position: [/*"topRight"*,*/ "bottomRight"],
+          current: current,
+          showQuickJumper: true,
+          showTotal: (total, range) =>
+            `${range[0]} đến ${range[1]} trên tổng số  ${total} sản phẩm`,
+        }}
+        onChange={onChangeSize}
+      />
     </React.Fragment>
   );
 };

@@ -1,5 +1,4 @@
-import {  Upload, message, Button, Col, Input, Row, Modal, Form, Select } from "antd";
-import { UploadOutlined } from '@ant-design/icons';
+import { message, Button, Col, Input, Row, Modal, Form, Select } from "antd";
 import React, { useEffect, useState } from "react";
 import callApi from "../../../util/callerApi";
 import ProductList from "./../components/ProductList";
@@ -34,7 +33,7 @@ const Products = () => {
 
 
   useEffect(() => {
-    callApi("get", "http://localhost:8080/api/type", null, null, "").then(
+    callApi("get", `${process.env.REACT_APP_URL_API}/api/type`, null, null, "").then(
       (res) => {
         setTypes(res.data);
       }
@@ -56,8 +55,8 @@ const Products = () => {
     formData.append("image", file);
     formData.append("product_code", values.product_code);
     formData.append("name", values.name);
-    formData.append("description", values.description);
     formData.append("price", values.price);
+    formData.append("description", values.description);
     formData.append("types_type_code",values.types_type_code);
     axios.post('http://localhost:8080/api/product', formData, {
         headers: {
@@ -86,9 +85,9 @@ const Products = () => {
   };
   return (
     <React.Fragment>
-      <Row style={{ margin: "20px 20px" }}>
+      <Row style={{ marginLeft: "50px" , marginRight: "600px", marginTop: "20px"}}>
         <Col md={12}>
-          <label>Danh sách món</label>
+          <label style={{fontWeight: "bold", fontSize: "20px"}}>DANH SÁCH SẢN PHẨM</label>
         </Col>
         <Col md={12} style={{ textAlign: "right" }}>
           <Button type="primary" onClick={onAddProduct}>
@@ -102,7 +101,7 @@ const Products = () => {
         </Col>
       </Row>
       <Modal
-        title="Basic Modal"
+        title="THÊM MÓN MỚI"
         visible={visible}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -134,12 +133,13 @@ const Products = () => {
             <Input />
           </Form.Item>
           <Form.Item
-            label="Giá"
-            name="price"
-            rules={[{ required: true, message: "Mời nhập giá!" }]}
-          >
-            <Input />
-          </Form.Item>
+                label="Giá"
+                name="price"
+                rules={[{ required: true, message: "Mời nhập giá!" }]}
+              >
+                <Input thousandSeparator={true} suffix={' VNĐ'} />
+              </Form.Item>
+  
           <Form.Item label="Mô tả" name="description">
             <Input />
           </Form.Item>

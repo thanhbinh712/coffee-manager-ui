@@ -8,5 +8,7 @@ export default function callApi(method, url, data,params, token) {
     headers: {
       'x-access-token':token,
     },
+  }).catch(err=>{
+    console.log(err);
   });
 }
