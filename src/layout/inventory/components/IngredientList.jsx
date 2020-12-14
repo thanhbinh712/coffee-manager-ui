@@ -3,7 +3,6 @@ import callApi from "../../../util/callerApi";
 import Swal from "sweetalert2";
 import {
   Table,
-  message,
   Button,
   Col,
   Input,
@@ -12,7 +11,7 @@ import {
   Form,
 } from "antd";
 
-const IngredientList = () => {
+const IngredientList = (props) => {
   const [ingredients, setIngredients] = useState([]);
   const [visible, setVisible] = useState(false);
   const [total, setTotal] = useState(0);
@@ -21,6 +20,13 @@ const IngredientList = () => {
   const [initFilter,setInitFilter] = useState({page:1,perPage:10});
   const [form] = Form.useForm();
   const [formFilter] = Form.useForm();
+  useEffect(() => {
+    if (props.dataCreate) {
+      let temp = ingredients?ingredients:[];
+      temp.push(props.dataCreate);
+      setIngredients([...temp]);
+    }
+  }, [props.dataCreate]);
   useEffect(() => {
     setLoading(true);
     callApi(
@@ -71,6 +77,21 @@ const IngredientList = () => {
     });
     //    setVisible(false)
   };
+
+  const onFinishFilter=(value)=>{
+    setLoading(true);
+    callApi(
+      "get",
+      `${process.env.REACT_APP_URL_API}/api/ingredient`,
+      null,
+      { page: 1, perPage: 10,name:value.name },
+      ""
+    ).then((res) => {
+      setLoading(false);
+      setIngredients(res.data.data);
+      setTotal(res.data.total);
+    });
+  }
 
   const onDelete = (record) => {
     let param = {
@@ -142,7 +163,69 @@ const IngredientList = () => {
           >
             Sửa
           </Button>
-          <Modal
+        </React.Fragment>
+      ),
+    },
+  ];
+  const onChangeSize = (page, pageSize) => {
+    setCurrent(parseInt(page.current));
+    setLoading(true);
+    callApi(
+      "get",
+      "http://localhost:8080/api/ingredient",
+      null,
+      { page: parseInt(page.current), perPage: 10 },
+      ""
+    ).then((res) => {
+      setLoading(false);
+      setIngredients(res.data.data);
+      setTotal(res.data.total);
+      setInitFilter({ page: parseInt(page.current), perPage: 10 })
+    });
+  };
+  return (
+    <React.Fragment>
+      <Row style={{marginTop: '20px'}}>
+        <Col md={16}>
+      <Form
+            {...layout}
+            name="basic"
+            initialValues={{ remember: true }}
+            onFinish={onFinishFilter}
+            form={formFilter}
+            dataSource={ingredients}
+          >
+            <Form.Item
+              label="Tìm kiếm"
+              name="name"
+            >
+              <Input placeholder="Nhập tên để tìm!" />
+            </Form.Item>
+          </Form>
+          </Col>
+          <Col style={{marginRight:"20px"}}>
+          <Button type="primary" onClick={()=>formFilter.submit()}>
+            Tìm 
+          </Button>
+          </Col>
+      </Row>
+      <Table
+        bordered
+        columns={columns}
+        loading={loading}
+        dataSource={ingredients}
+        pagination={{
+          total: total,
+          defaultPageSize: 10,
+          position: [/*"topRight"*,*/ "bottomRight"],
+          current: current,
+          showQuickJumper: true,
+          showTotal: (total, range) =>
+            `${range[0]} đến ${range[1]} trên tổng số  ${total} nguyên liệu`,
+        }}
+        onChange={onChangeSize}
+      />
+      <Modal
             title="Sửa nguyên liệu"
             visible={visible}
             onOk={handleOk}
@@ -157,7 +240,7 @@ const IngredientList = () => {
               {...layout}
               name="basic"
               initialValues={{ remember: true }}
-              //onFinish={onFinish}
+              onFinish={onFinish}
               id="category-editor-form-update-ingredient"
               form={form}
             >
@@ -205,71 +288,6 @@ const IngredientList = () => {
               </Form.Item>
             </Form>
           </Modal>
-        </React.Fragment>
-      ),
-    },
-  ];
-  const onChangeSize = (page, pageSize) => {
-    setCurrent(parseInt(page.current));
-    setLoading(true);
-    callApi(
-      "get",
-      "http://localhost:8080/api/ingredient",
-      null,
-      { page: parseInt(page.current), perPage: 10 },
-      ""
-    ).then((res) => {
-      setLoading(false);
-      setIngredients(res.data.data);
-      setTotal(res.data.total);
-      setInitFilter({ page: parseInt(page.current), perPage: 10 })
-    });
-  };
-  return (
-    <React.Fragment>
-      <Row style={{ marginLeft: "190px"}}>
-        <Col md={12}>
-          <Form
-            {...layout}
-            name="basic"
-            initialValues={{ remember: true }}
-            onFinish={onFinish}
-            form={formFilter}
-          >
-            <Form.Item
-              label="Tìm kiếm"
-              name="name"
-              rules={[
-                {message: "Nhập tên để tìm!" },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-            
-          </Form>
-        </Col>
-        <Col md={2} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={()=>formFilter.submit()} >
-            Tìm 
-          </Button>
-        </Col>
-      </Row>
-      <Table
-        bordered
-        columns={columns}
-        loading={loading}
-        dataSource={ingredients}
-        pagination={{
-          total: total,
-          defaultPageSize: 10,
-          position: [/*"topRight"*,*/ "bottomRight"],
-          current: current,
-          showQuickJumper: true,
-          showTotal: (total, range) =>
-            `${range[0]} đến ${range[1]} trên tổng số  ${total} nguyên liệu`,
-        }}
-        onChange={onChangeSize}
-      />
     </React.Fragment>
   );
 };

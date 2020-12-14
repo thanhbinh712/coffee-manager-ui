@@ -12,12 +12,18 @@ const ProductTypes = () => {
 
   return (
     <React.Fragment>
-    <Row style={{ marginLeft: "400px" , marginRight: "20px", marginTop: "100px", marginBottom:"20px"}}>
-    <Col md={12}>
-      <label style={{fontWeight: "bold", color: "blue", fontSize: "20px"}}>QUẢN LÝ DANH MỤC - SẢN PHẨM</label>
-    </Col>
-  </Row>
-  <Tabs onChange={callback} type="card">
+    <div
+        style={{
+          fontWeight: "bold",
+          color: "#001529",
+          fontSize: "30px",
+          textAlign: "center",
+          marginTop: "100px",
+        }}
+      >
+        QUẢN LÝ DANH MỤC - SẢN PHẨM
+      </div>
+  <Tabs onChange={callback} type="card" style={{ marginLeft: "20px" }}>
     <TabPane tab="Quản lý danh mục sản phẩm" key="1">
       <Types/>
     </TabPane>

@@ -39,17 +39,13 @@ const Areas = () => {
   };
   return (
     <React.Fragment>
-      <Row style={{ marginLeft: "20px" , marginRight: "700px", marginTop: "20px"}}>
-        <Col md={12}>
-          <label style={{fontWeight: "bold", fontSize: "17px"}}>DANH SÁCH KHU VỰC</label>
-        </Col>
-        <Col md={12} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={onAddArea}>
+      <Row style={{marginRight: "300px"}}>
+          <label style={{fontWeight: "bold", fontSize: "20px"}}>DANH MỤC KHU VỰC</label>
+          <Button type="primary" onClick={onAddArea} style={{marginLeft: "10px"}}>
             Thêm khu vực
-          </Button>
-        </Col>
+        </Button>
       </Row>
-      <Row style={{ margin: "20px 20px" }}>
+      <Row style={{ marginTop: "20px" }}>
         <Col md={24}>
             <AreaList/>
         </Col>

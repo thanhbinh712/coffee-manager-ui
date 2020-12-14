@@ -11,10 +11,10 @@ const Tables = () => {
   const handleOk = (e) => {
     console.log(e);
   };
-
+  let user=JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    callApi("get", "http://localhost:8080/api/area", null, null, "").then(
+    callApi("get", `${process.env.REACT_APP_URL_API}/api/area`, null, null, "").then(
       (res) => {
         setAreas(res.data);
       }
@@ -35,7 +35,7 @@ const Tables = () => {
     callApi(
         "post",
         `${process.env.REACT_APP_URL_API}/api/table`,
-        null,null).then((res)=>{
+        values,null,user.accessToken).then((res)=>{
       Swal.fire({
         position: 'top-end',
         icon: 'success',
@@ -58,17 +58,13 @@ const Tables = () => {
   };
   return (
     <React.Fragment>
-      <Row style={{ marginLeft: "20px" , marginRight: "700px", marginTop: "20px"}}>
-        <Col md={12}>
-          <label style={{fontWeight: "bold", fontSize: "17px"}}>DANH SÁCH BÀN</label>
-        </Col>
-        <Col md={12} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={onAddTable}>
+      <Row style={{marginRight: "300px"}}>
+          <label style={{fontWeight: "bold", fontSize: "20px"}}>DANH SÁCH BÀN</label>
+          <Button type="primary" onClick={onAddTable} style={{marginLeft: "10px"}}>
             Thêm bàn
-          </Button>
-        </Col>
+        </Button>
       </Row>
-      <Row style={{ margin: "20px 20px" }}>
+      <Row style={{ marginTop: "20px" }}>
         <Col md={24}>
           <TableList />
         </Col>
@@ -112,13 +108,13 @@ const Tables = () => {
           >
             <Input />
           </Form.Item>
-          <Form.Item
+          {/* <Form.Item
             label="Trạng thái"
             name="status"
             rules={[{ required: true, message: "Mời nhập trạng thái!" }]}
           >
             <Input />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item
             label="Khu vực"
             name="areas_area_code"

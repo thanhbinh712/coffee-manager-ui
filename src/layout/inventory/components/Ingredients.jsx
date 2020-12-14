@@ -6,7 +6,11 @@ import Swal from "sweetalert2";
 import axios from "axios";
 
 const Ingredients = () => {
+  const [newData, setNewData] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [ingredients, setIngredients] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
   const handleOk = (e) => {
     console.log(e);
   };
@@ -17,12 +21,28 @@ const Ingredients = () => {
   const onAddIngredient = () => {
     setVisible(true);
   };
+  // const onFinishFilter=(value)=>{
+  //   setLoading(true);
+  //   callApi(
+  //     "get",
+  //     `${process.env.REACT_APP_URL_API}/api/ingredient`,
+  //     null,
+  //     { page: 1, perPage: 10,name:value.name },
+  //     ""
+  //   ).then((res) => {
+  //     setLoading(false);
+  //     setIngredients(res.data.data);
+  //     setTotal(res.data.total);
+  //   });
+  // }
   const layout = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
   };
+  let user=JSON.parse(localStorage.getItem('user'));
   const onFinish = (values) => {
-    callApi("post", process.env.REACT_APP_URL_API+"/api/ingredient", values, null, "").then((res)=>{
+    callApi("post", process.env.REACT_APP_URL_API+"/api/ingredient", values, null, user.accessToken).then((res)=>{
+      setNewData(res.data);
       Swal.fire({
         position: 'top-end',
         icon: 'success',
@@ -30,7 +50,7 @@ const Ingredients = () => {
         showConfirmButton: false,
         timer: 1500
       }).then(()=>{
-        window.location.reload(false)
+        setVisible(false);
       })
     })
     .catch((err) => {
@@ -43,21 +63,18 @@ const Ingredients = () => {
           })
     });
   };
+  const [formFilter] = Form.useForm();
   return (
     <React.Fragment>
-      <Row style={{ marginLeft: "20px" , marginRight: "700px", marginTop: "20px"}}>
-        <Col md={12}>
-          <label style={{fontWeight: "bold", fontSize: "17px"}}>DANH SÁCH NGUYÊN LIỆU</label>
-        </Col>
-        <Col md={12} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={onAddIngredient}>
+      <Row style={{marginRight: "300px"}}>
+          <label style={{fontWeight: "bold", fontSize: "20px"}}>DANH SÁCH NGUYÊN LIỆU</label>
+          <Button type="primary" onClick={onAddIngredient} style={{marginLeft: "10px"}}>
             Thêm nguyên liệu
-          </Button>
-        </Col>
+        </Button>
       </Row>
-      <Row style={{ margin: "20px 20px" }}>
+      <Row style={{marginRight:"20px"}}>
         <Col md={24}>
-          <IngredientList />
+          <IngredientList dataCreate={newData}/>
         </Col>
       </Row>
       <Modal

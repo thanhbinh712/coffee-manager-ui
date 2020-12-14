@@ -12,12 +12,18 @@ const AreaTables = () => {
 
   return (
     <React.Fragment>
-    <Row style={{ marginLeft: "400px" , marginRight: "20px", marginTop: "100px", marginBottom:"20px"}}>
-    <Col md={12}>
-      <label style={{fontWeight: "bold", color: "blue", fontSize: "20px"}}>QUẢN LÝ KHU VỰC - BÀN</label>
-    </Col>
-  </Row>
-  <Tabs onChange={callback} type="card">
+    <div
+        style={{
+          fontWeight: "bold",
+          color: "#001529",
+          fontSize: "30px",
+          textAlign: "center",
+          marginTop: "100px",
+        }}
+      >
+        QUẢN LÝ KHU VỰC - BÀN
+      </div>
+  <Tabs onChange={callback} type="card" style={{ marginLeft: "20px" }}>
     <TabPane tab="Quản lý khu vực" key="1">
       <Areas/>
     </TabPane>

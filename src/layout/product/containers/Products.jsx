@@ -6,26 +6,10 @@ import Swal from "sweetalert2";
 import axios from "axios";
 const { Option } = Select;
 
-const props = {
-  name: 'file',
-  action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-  headers: {
-    authorization: 'authorization-text',
-  },
-  onChange(info) {
-    if (info.file.status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (info.file.status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully`);
-    } else if (info.file.status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-};
 const Products = () => {
   const [visible, setVisible] = useState(false);
   const [file,setFile]=useState(null);
+  const [newData, setNewData] = useState(null);
   const [types, setTypes] = useState([]);
   const handleOk = (e) => {
     console.log(e);
@@ -35,7 +19,7 @@ const Products = () => {
   useEffect(() => {
     callApi("get", `${process.env.REACT_APP_URL_API}/api/type`, null, null, "").then(
       (res) => {
-        setTypes(res.data);
+        setTypes(res.data.data);
       }
     );
   }, []);
@@ -70,10 +54,11 @@ const Products = () => {
         showConfirmButton: false,
         timer: 1500
       }).then(()=>{
-        window.location.reload(false)
+        setVisible(false)
       })
     })
     .catch((err) => {
+      console.log(err);
         Swal.fire({
             position: 'top-end',
             icon: 'error',
@@ -85,19 +70,15 @@ const Products = () => {
   };
   return (
     <React.Fragment>
-      <Row style={{ marginLeft: "50px" , marginRight: "600px", marginTop: "20px"}}>
-        <Col md={12}>
+      <Row style={{marginRight: "300px"}}>
           <label style={{fontWeight: "bold", fontSize: "20px"}}>DANH SÁCH SẢN PHẨM</label>
-        </Col>
-        <Col md={12} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={onAddProduct}>
-            Thêm món
-          </Button>
-        </Col>
+          <Button type="primary" onClick={onAddProduct} style={{marginLeft: "10px"}}>
+            Thêm sản phẩm
+        </Button>
       </Row>
-      <Row style={{ margin: "20px 20px" }}>
+      <Row style={{marginTop: "20px"}}>
         <Col md={24}>
-          <ProductList />
+          <ProductList dataCreate={newData} />
         </Col>
       </Row>
       <Modal

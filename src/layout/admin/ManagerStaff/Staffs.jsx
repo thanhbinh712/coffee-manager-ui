@@ -3,21 +3,17 @@ import React, {useState, useEffect } from "react";
 import callApi from "../../../util/callerApi";
 import StaffList from "../ManagerStaff/StaffList";
 import Swal from "sweetalert2";
+
 const { Option } = Select;
 
 const Staffs = () => {
   const [visible, setVisible] = useState(false);
+  const [newData, setNewData] = useState(null);
   const [roles, setRoles] = useState([]);
   const handleOk = (e) => {
     console.log(e);
   };
-  const renderGender = (gender) => {
-    if (gender === 0) {
-      return "Nữ";
-    } else {
-      return "Nam";
-    }
-  };
+  
   useEffect(() => {
     callApi("get", `${process.env.REACT_APP_URL_API}/api/auth/get_role`, null, null, "").then(
       (res) => {
@@ -40,8 +36,9 @@ const Staffs = () => {
   const onFinish = (values) => {
     callApi(
       "post",
-      `${process.env.REACT_APP_URL_API}/api/create_user`,
+      `${process.env.REACT_APP_URL_API}/api/auth/users`,
       values,null,user.accessToken).then((res)=>{
+      setNewData(res.data);
       Swal.fire({
         position: 'top-end',
         icon: 'success',
@@ -49,34 +46,37 @@ const Staffs = () => {
         showConfirmButton: false,
         timer: 1500
       }).then(()=>{
-        window.location.reload(false)
+        setVisible(false);
       })
     })
     .catch((err) => {
         Swal.fire({
             position: 'top-end',
             icon: 'error',
-            title: 'Thất bại',
+            title: 'Email đã được sử dụng!',
             showConfirmButton: false,
             timer: 1500
           })
     });
   };
+  
   return (
     <React.Fragment>
-      <Row style={{ marginLeft: "400px" , marginRight: "20px", marginTop: "100px"}}>
-        <Col md={12}>
-          <label style={{fontWeight: "bold", color: "blue", fontSize: "20px"}}>DANH SÁCH NHÂN VIÊN</label>
-        </Col>
-        <Col md={12} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={onAddStaff}>
-            Thêm nhân viên
-          </Button>
-        </Col>
+     <Row style={{ marginRight: "300px", marginTop:"100px", marginLeft:"20px" }}>
+        <div style={{textAlign:"center",fontWeight: "bold", fontSize: "30px"}}>
+          DANH SÁCH NHÂN VIÊN
+        <Button
+          type="primary"
+          onClick={onAddStaff}
+          style={{ marginLeft: "10px" }}
+        >
+          Thêm nhân viên
+        </Button>
+        </div>
       </Row>
       <Row style={{ margin: "20px 20px" }}>
         <Col md={24}>
-            <StaffList />
+            <StaffList dataCreate={newData}/>
         </Col>
       </Row>
       <Modal
@@ -116,7 +116,7 @@ const Staffs = () => {
                 label="Tên"
                 name="name"
                 rules={[{ required: true, message: "Mời nhập tên!" },
-                { type: "text", message: "Không đúng định dạng" },]}
+               ]}
               >
                 <Input/>
               </Form.Item>
@@ -136,7 +136,7 @@ const Staffs = () => {
                 label="Số điện thoại"
                 name="phone"
                 rules={[{ required: true, message: "Mời nhập số điện thoại!" },
-                { type: "number", message: "Không đúng định dạng" },]}
+                ]}
               >
                 <Input/>
               </Form.Item>

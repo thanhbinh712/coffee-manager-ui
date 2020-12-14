@@ -10,6 +10,7 @@ import {
     Row,
     Modal,
     Form,
+    Tag,
     Select,
 } from "antd";
 
@@ -63,6 +64,18 @@ const TableList = () => {
   const handleOk = (e) => {
     //    setVisible(false)
   };
+
+  const renderStatus = (status) => {
+      if(status === 0){
+       return <Tag color="green">Bàn trống</Tag>;
+      }
+      if(status === 1){
+        return <Tag color="red">Đã order</Tag>;;
+      }
+      if(status === 2){
+        return <Tag color="blue">Đang pha chế</Tag>;;
+      }
+  }
 
   const onFinish = (value) => {
     callApi(
@@ -123,6 +136,8 @@ const TableList = () => {
         title: "Trạng thái",
         dataIndex: "status",
         key: "status",
+        render: (text, record) => renderStatus(record.status)
+
       },
     {
       title: "Action",
@@ -180,13 +195,13 @@ const TableList = () => {
               >
                 <Input />
               </Form.Item>
-              <Form.Item
+              {/* <Form.Item
                 label="Trạng thái"
                 name="status"
                 rules={[{ required: true, message: "Mời nhập đơn vị tính!" }]}
               >
                 <Input />
-              </Form.Item>
+              </Form.Item> */}
               <Form.Item
                 label="Khu vực"
                 name="areas_area_code"
@@ -233,32 +248,29 @@ const TableList = () => {
   };
   return (
     <React.Fragment>
-      <Row style={{ marginLeft: "190px"}}>
-        <Col md={12}>
-          <Form
+      <Row>
+      <Col md={16}>
+      <Form
             {...layout}
             name="basic"
             initialValues={{ remember: true }}
-            onFinish={onFinish}
+           // onFinish={onFinishFilter}
             form={formFilter}
+            // dataSource={ingredients}
           >
             <Form.Item
               label="Tìm kiếm"
               name="name"
-              rules={[
-                {message: "Nhập tên để tìm!" },
-              ]}
             >
-              <Input />
+              <Input placeholder="Nhập tên để tìm!" />
             </Form.Item>
-            
           </Form>
-        </Col>
-        <Col md={2} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={()=>formFilter.submit()} >
+          </Col>
+          <Col style={{marginRight:"20px"}}>
+          <Button type="primary" onClick={()=>formFilter.submit()}>
             Tìm 
           </Button>
-        </Col>
+          </Col>
       </Row>
       <Table
         bordered

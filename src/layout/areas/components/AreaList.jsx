@@ -149,32 +149,29 @@ const AreaList = () => {
 
   return (
     <React.Fragment>
-      <Row style={{ marginLeft: "190px"}}>
-        <Col md={12}>
-          <Form
+      <Row>
+      <Col md={16}>
+      <Form
             {...layout}
             name="basic"
             initialValues={{ remember: true }}
-            onFinish={onFinish}
+           // onFinish={onFinishFilter}
             form={formFilter}
+            // dataSource={ingredients}
           >
             <Form.Item
               label="Tìm kiếm"
               name="name"
-              rules={[
-                {message: "Nhập tên để tìm!" },
-              ]}
             >
-              <Input />
+              <Input placeholder="Nhập tên để tìm!" />
             </Form.Item>
-            
           </Form>
-        </Col>
-        <Col md={2} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={()=>formFilter.submit()} >
+          </Col>
+          <Col style={{marginRight:"20px"}}>
+          <Button type="primary" onClick={()=>formFilter.submit()}>
             Tìm 
           </Button>
-        </Col>
+          </Col>
       </Row>
       <Table
         bordered

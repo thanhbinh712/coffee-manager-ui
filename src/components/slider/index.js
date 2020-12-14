@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Layout, Menu, Anchor } from "antd";
 import "./index";
-import { Image } from "antd";
 import {
   UserOutlined,
   ShoppingOutlined,
@@ -16,13 +15,18 @@ import { Link, useLocation } from "react-router-dom";
 const { Sider } = Layout;
 const height = window.innerHeight;
 const SiderLayout = (props) => {
+  let user = JSON.parse(localStorage.getItem("user"));
   const location = useLocation();
   return (
-    <Anchor>
+    <React.Fragment>
+      <Anchor>
       <Sider
         style={{
-          height: "100vh",
-          background: "#001529",
+         height: "100vh",
+         background: "#001529",
+          // // position: "fixed",
+          // left: 0, 
+          // zIndex:1000
         }}
         breakpoint="lg"
         collapsedWidth="0"
@@ -36,17 +40,15 @@ const SiderLayout = (props) => {
         <div className="logo">
           <img
             width="100%"
-            src="https://kinhdoanhcafe.com/wp-content/uploads/2013/04/thiet-ke-logo-cho-quan-ca-phe-600x600.png"
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkWRa6HCNLpZaYCVDoi6D6OYwK5vhH-JE5Bw&usqp=CAU"
           />
         </div>
         <Menu
           theme="dark"
           mode="inline"
+          style={{ height: '100%', borderRight: 0 }}
           defaultSelectedKeys={[location.pathname]}
         >
-          <Menu.Item key="/admin/home" icon={<UserOutlined />}>
-            <Link to="/admin/home">Quản lý nhân viên</Link>
-          </Menu.Item>
           <Menu.Item key="/admin/product" icon={<ShoppingOutlined />}>
             <Link to="/admin/product">Quản lý sản phẩm</Link>
           </Menu.Item>
@@ -59,12 +61,20 @@ const SiderLayout = (props) => {
           <Menu.Item key="/admin/promotion" icon={<PlusSquareOutlined />}>
             <Link to="/admin/promotion">Quản lý khuyến mãi</Link>
           </Menu.Item>
+          {user?.roles_role_code === 1 && (
+          <Menu.Item key="/admin/home" icon={<UserOutlined />}>
+            <Link to="/admin/home">Quản lý nhân viên</Link>
+          </Menu.Item>
+          )}
+          {user?.roles_role_code === 1 && (
           <Menu.Item key="/admin/dashboard" icon={<DashboardOutlined />}>
             <Link to="/admin/dashboard">Thống kê</Link>
           </Menu.Item>
+          )}
         </Menu>
       </Sider>
-    </Anchor>
+      </Anchor>
+      </React.Fragment>
   );
 };
 

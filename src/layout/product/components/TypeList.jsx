@@ -1,37 +1,40 @@
 import React, { useEffect, useState } from "react";
 import callApi from "../../../util/callerApi";
 import Swal from "sweetalert2";
-import {
-  Table,
-  message,
-  Button,
-  Col,
-  Input,
-  Row,
-  Modal,
-  Form,
-} from "antd";
+import { Table, Button, Col, Input, Row, Modal, Form } from "antd";
 
-const TypeList = () => {
+const TypeList = (props) => {
   const [types, setTypes] = useState([]);
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [form] = Form.useForm();
   const [formFilter] = Form.useForm();
-  let user=JSON.parse(localStorage.getItem('user'));
+  let user = JSON.parse(localStorage.getItem("user"));
+  useEffect(() => {
+    if (props.dataCreate) {
+      let temp = types?types:[];
+      temp.push({
+        type_code: props.dataCreate.type_code,
+        name: props.dataCreate.name,
+      });
+      setTypes([...temp]);
+    }
+  }, [props.dataCreate]);
   useEffect(() => {
     setLoading(true);
     callApi(
       "get",
-      `${process.env.REACT_APP_URL_API}/api/type`,null, null,"").then(
-        (res) => {
+      `${process.env.REACT_APP_URL_API}/api/type`,
+      null,
+      null,
+      ""
+    ).then((res) => {
       setLoading(false);
-      setTypes(res.data);
+      setTypes(res.data.data);
     });
   }, []);
   const onUpdate = (record) => {
     setVisible(true);
-    console.log(record);
     form.setFieldsValue({
       type_code: record.type_code,
       name: record.name,
@@ -46,30 +49,54 @@ const TypeList = () => {
     //    setVisible(false)
   };
 
-  const onFinish = (values) => {
+  const onFinishFilter = (value) => {
+    setLoading(true);
+    callApi(
+      "get",
+      `${process.env.REACT_APP_URL_API}/api/type`,
+      null,
+      {name:value.name},
+      ""
+    ).then((res) => {
+      setLoading(false);
+      setTypes(res.data.data);
+    });
+  };
+
+  const onFinish = (values) => { 
     callApi(
       "put",
       `${process.env.REACT_APP_URL_API}/api/type`,
-      values,null,user.accessToken).then((res)=>{
-      Swal.fire({
-        position: 'top-end',
-        icon: 'success',
-        title: 'Thành công',
-        showConfirmButton: false,
-        timer: 1500
-      }).then(()=>{
-        window.location.reload(false)
-      })
-    })
-    .catch((err) => {
+      values,
+      null,
+      user.accessToken
+    )
+      .then((res) => {
         Swal.fire({
-            position: 'top-end',
-            icon: 'error',
-            title: 'Thất bại',
-            showConfirmButton: false,
-            timer: 1500
-          })
-    });
+          position: "top-end",
+          icon: "success",
+          title: "Thành công",
+          showConfirmButton: false,
+          timer: 1500,
+        }).then(() => {
+          let temp=types;
+          let index=temp.findIndex(t=>t.type_code===res.data.type_code);
+          if(index!==-1){
+            temp[index]=res.data;
+            setTypes([...temp]);
+            setVisible(false)
+          }
+        });
+      })
+      .catch((err) => {
+        Swal.fire({
+          position: "top-end",
+          icon: "error",
+          title: "Thất bại",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      });
   };
 
   const onDelete = (record) => {
@@ -86,25 +113,52 @@ const TypeList = () => {
       confirmButtonText: "Xóa",
       cancelButtonText: "Hủy",
     }).then((result) => {
-      if(result.values){
+      if (result.value) {
         callApi(
           "delete",
           `${process.env.REACT_APP_URL_API}/api/type`,
-          param,null,user.accessToken).then((res)=>{
-          Swal.fire({
-            position: 'top-end',
-            icon: 'success',
-            title: 'Thành công',
-            showConfirmButton: false,
-            timer: 1500
-          }).then(()=>{
-            window.location.reload(false)
+          param,
+          null,
+          user.accessToken
+        )
+          .then((res) => {
+            if (res.status === 500) {
+              Swal.fire({
+                position: "top-end",
+                icon: "error",
+                title: "Thất bại",
+                showConfirmButton: false,
+                timer: 1500,
+              });
+            } else {
+              Swal.fire({
+                position: "top-end",
+                icon: "success",
+                title: "Thành công",
+                showConfirmButton: false,
+                timer: 1500,
+              }).then(() => {
+                let temp=types;
+                let index=temp.findIndex(t=>t.type_code===res.data.deleted);
+                if(index!==-1){
+                  temp.splice(index, 1);
+                  setTypes([...temp]);
+                }
+              });
+            }
           })
-        })
+          .catch((err) => {
+            Swal.fire({
+              position: "top-end",
+              icon: "error",
+              title: "Đã có sản phẩm. Không thể xóa!",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          });
       }
     });
   };
-
   const layout = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
@@ -179,39 +233,27 @@ const TypeList = () => {
 
   return (
     <React.Fragment>
-      <Row style={{ marginLeft: "190px"}}>
-        <Col md={12}>
+      <Row>
+        <Col md={16}>
           <Form
             {...layout}
             name="basic"
             initialValues={{ remember: true }}
-            onFinish={onFinish}
+            onFinish={onFinishFilter}
             form={formFilter}
           >
-            <Form.Item
-              label="Tìm kiếm"
-              name="name"
-              rules={[
-                {message: "Nhập tên để tìm!" },
-              ]}
-            >
-              <Input />
+            <Form.Item label="Tìm kiếm" name="name">
+              <Input placeholder="Nhập tên để tìm!" />
             </Form.Item>
-            
           </Form>
         </Col>
-        <Col md={2} style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={()=>formFilter.submit()} >
-            Tìm 
+        <Col style={{ marginRight: "20px" }}>
+          <Button type="primary" onClick={() => formFilter.submit()}>
+            Tìm
           </Button>
         </Col>
       </Row>
-      <Table
-        bordered
-        columns={columns}
-        loading={loading}
-        dataSource={types}
-      />
+      <Table bordered columns={columns} loading={loading} dataSource={types} />
     </React.Fragment>
   );
 };

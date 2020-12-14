@@ -3,8 +3,17 @@ import PropTypes from "prop-types";
 import callApi from "./../../util/callerApi";
 import "./login.css";
 import { Form, Input, Button, Checkbox, Row, Col, Image, Layout } from "antd";
-import {Redirect} from "react-router-dom";
-const { Footer, Content } = Layout;
+import {toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { Link } from "react-router-dom";
+
+toast.configure({
+  autoClose: 2000,
+  draggable: false,
+  position: toast.POSITION.TOP_LEFT
+})
+
+const { Content } = Layout;
 const Login = (props) => {
   const [users, setUsers] = useState([]);
   useEffect(() => {}, []);
@@ -28,11 +37,7 @@ const Login = (props) => {
           localStorage.setItem("user", JSON.stringify(res.data));
           window.location.reload(false)
         })
-        .catch((err) => console.log(err));
-    };
-
-    const onFinishFailed = (errorInfo) => {
-      console.log("Failed:", errorInfo);
+        .catch((err) => toast('Email hoặc mật khẩu sai'));
     };
     const layout = {
       labelCol: { span: 8 },
@@ -40,6 +45,11 @@ const Login = (props) => {
     };
     return (
       <Layout className="form-signin-custom" style={{height:"100vh",width:"100%"}}>
+        <div className="container mx-auto px-4 h-full">
+        <div className="flex content-center items-center justify-center h-full">
+        <div className="w-full lg:w-4 px-2">
+            <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-white- border-0">
+              <div className="rounded-t mb-0 px-7 py-10">
         <Content>
         <Row>
           <Col md={8}></Col>
@@ -48,7 +58,6 @@ const Login = (props) => {
               name="basic"
               initialValues={{ remember: true }}
               onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
               {...layout}
             >
               <Form.Item
@@ -85,7 +94,12 @@ const Login = (props) => {
           </Col>
         </Row>
         </Content>
-      </Layout>
+        </div>
+        </div>
+        </div>
+        </div>
+        </div>
+      </Layout>     
     );
   };
   return (
